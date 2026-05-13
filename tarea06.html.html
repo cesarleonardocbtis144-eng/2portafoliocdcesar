@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía de Conceptos Generales de Python</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-deep: #020818;
+    --navy-mid: #050e2e;
+    --navy-soft: #0a1a4a;
+    --navy-light: #112260;
+    --gold-bright: #ffd700;
+    --gold-mid: #c9a227;
+    --gold-soft: #a07820;
+    --gold-glow: rgba(255, 215, 0, 0.15);
+    --gold-border: rgba(201, 162, 39, 0.4);
+    --star-color: rgba(255, 255, 255, 0.7);
+    --text-main: #e8e0ff;
+    --text-muted: #8899cc;
+    --code-bg: rgba(10, 26, 74, 0.8);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy-deep);
+    color: var(--text-main);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ─── STAR FIELD ─── */
+  #stars-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ─── BACK BUTTON ─── */
+  .btn-back {
+    position: fixed;
+    top: 1.2rem;
+    left: 1.2rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.1rem;
+    background: rgba(5, 14, 46, 0.85);
+    border: 1px solid var(--gold-mid);
+    border-radius: 3px;
+    color: var(--gold-bright);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 12px rgba(255,215,0,0.1);
+  }
+  .btn-back:hover {
+    background: rgba(255, 215, 0, 0.1);
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+    color: #fff;
+  }
+  .btn-back svg { width: 14px; height: 14px; fill: currentColor; }
+
+  /* ─── COVER ─── */
+  .cover {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: radial-gradient(ellipse at 50% 40%, rgba(17,34,96,0.6) 0%, transparent 70%);
+  }
+
+  .cover-emblem {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 18px var(--gold-mid));
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .cover-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.35em;
+    color: var(--gold-mid);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  .cover-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 900;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #ffd700 0%, #fff8dc 40%, #c9a227 70%, #ffd700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(255,215,0,0.3));
+    margin-bottom: 1.5rem;
+  }
+
+  .cover-sub {
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--text-muted);
+    max-width: 520px;
+    margin-bottom: 3rem;
+  }
+
+  .cover-divider {
+    width: 180px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-mid), transparent);
+    margin: 0 auto 2.5rem;
+  }
+
+  .cover-cta {
+    display: inline-block;
+    padding: 0.8rem 2.2rem;
+    border: 1px solid var(--gold-mid);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    text-decoration: none;
+    transition: all 0.3s;
+    background: rgba(255,215,0,0.04);
+  }
+  .cover-cta:hover {
+    background: rgba(255,215,0,0.12);
+    box-shadow: 0 0 24px rgba(255,215,0,0.25);
+  }
+
+  .cover-scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    animation: pulse-down 2s ease-in-out infinite;
+  }
+  @keyframes pulse-down {
+    0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 1; transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ─── LAYOUT ─── */
+  .page-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* ─── SIDEBAR NAV ─── */
+  .sidebar {
+    position: sticky;
+    top: 2rem;
+    padding: 1.8rem;
+    background: rgba(5, 14, 46, 0.7);
+    border: 1px solid var(--gold-border);
+    border-radius: 4px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 30px rgba(0,0,0,0.4), inset 0 0 40px rgba(255,215,0,0.02);
+  }
+
+  .sidebar-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold-mid);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--gold-border);
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .nav-list li a {
+    display: block;
+    padding: 0.45rem 0.7rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-family: 'Crimson Pro', serif;
+    border-left: 2px solid transparent;
+    transition: all 0.25s;
+    border-radius: 0 2px 2px 0;
+  }
+  .nav-list li a:hover {
+    color: var(--gold-bright);
+    border-left-color: var(--gold-bright);
+    background: rgba(255,215,0,0.06);
+  }
+  .nav-list li.section-title a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    font-weight: 600;
+    margin-top: 0.8rem;
+  }
+  .nav-badge {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold-mid);
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
+  /* ─── CONTENT ─── */
+  .content {
+    padding-top: 1rem;
+  }
+
+  .chapter {
+    margin-bottom: 4rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .chapter-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gold-border);
+  }
+
+  .chapter-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--gold-soft);
+    min-width: 40px;
+  }
+
+  .chapter-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gold-bright);
+    text-shadow: 0 0 20px rgba(255,215,0,0.2);
+  }
+
+  .section {
+    margin-bottom: 2.5rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gold-mid);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 18px; height: 1px;
+    background: var(--gold-mid);
+  }
+
+  p { margin-bottom: 1rem; color: #cdd5f0; }
+
+  /* ─── CODE BLOCKS ─── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--gold-border);
+    border-left: 3px solid var(--gold-mid);
+    border-radius: 4px;
+    padding: 1.4rem 1.6rem;
+    margin: 1.2rem 0;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 0.5rem;
+    right: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .code-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: #b8d4ff;
+    white-space: pre;
+  }
+  .kw { color: #ff9ecb; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm { color: #6b7db3; font-style: italic; }
+  .num { color: #fca5a5; }
+  .var { color: #e2e8f0; }
+  .op { color: var(--gold-mid); }
+
+  /* ─── CALLOUTS ─── */
+  .callout {
+    display: flex;
+    gap: 1rem;
+    padding: 1.1rem 1.4rem;
+    border-radius: 4px;
+    margin: 1.4rem 0;
+    background: rgba(10, 26, 74, 0.5);
+    border: 1px solid;
+  }
+  .callout.tip { border-color: rgba(134, 239, 172, 0.3); }
+  .callout.note { border-color: var(--gold-border); }
+  .callout.goal { border-color: rgba(167, 139, 250, 0.4); background: rgba(167, 139, 250, 0.05); }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.95rem; color: #b8c8e8; }
+  .callout-text strong { color: var(--gold-bright); }
+
+  /* ─── RESULT SHOWCASE ─── */
+  .result-box {
+    background: rgba(5, 14, 46, 0.9);
+    border: 1px solid var(--gold-mid);
+    border-radius: 6px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 0 40px rgba(255,215,0,0.08), inset 0 0 30px rgba(0,0,0,0.3);
+  }
+  .result-box-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold-mid);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--gold-border);
+  }
+
+  /* ─── MINI DESIGN DEMO ─── */
+  .demo-card {
+    background: linear-gradient(135deg, #0a1a4a, #020818);
+    border: 1px solid var(--gold-border);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .demo-card h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-bright);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+  .demo-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .demo-stars { color: var(--gold-mid); letter-spacing: 0.3em; margin-bottom: 1rem; font-size: 0.9rem; }
+  .demo-btn {
+    display: inline-block;
+    padding: 0.6rem 1.8rem;
+    border: 1px solid var(--gold-mid);
+    border-radius: 3px;
+    color: var(--gold-bright);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: rgba(255,215,0,0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 0.3rem;
+  }
+  .demo-btn:hover { background: rgba(255,215,0,0.15); }
+  .demo-output {
+    margin-top: 1.2rem;
+    padding: 0.8rem;
+    background: rgba(0,0,0,0.4);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: #86efac;
+    min-height: 2.5rem;
+  }
+
+  /* ─── TABLE ─── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2rem 0;
+    font-size: 0.9rem;
+  }
+  .data-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-mid);
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--gold-border);
+    text-align: left;
+    background: rgba(10, 26, 74, 0.5);
+  }
+  .data-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid rgba(17, 34, 96, 0.8);
+    color: #b8c8e8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+  }
+  .data-table tr:hover td { background: rgba(255,215,0,0.03); }
+
+  /* ─── OBJETIVO FINAL ─── */
+  .final-goal {
+    background: linear-gradient(135deg, rgba(17,34,96,0.6), rgba(2,8,24,0.8));
+    border: 1px solid var(--gold-mid);
+    border-radius: 8px;
+    padding: 3rem;
+    margin-top: 2rem;
+    box-shadow: 0 0 60px rgba(255,215,0,0.1), 0 0 120px rgba(255,215,0,0.04);
+    text-align: center;
+  }
+  .final-goal h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    color: var(--gold-bright);
+    margin-bottom: 1rem;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 860px) {
+    .page-wrapper { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Stars canvas -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- Back button -->
+<a href="index.html" class="btn-back">
+  <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  Portafolio
+</a>
+
+<!-- ══════════════════ COVER ══════════════════ -->
+<section class="cover">
+  <!-- Emblem SVG -->
+  <svg class="cover-emblem" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="gld" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffd700"/>
+        <stop offset="100%" stop-color="#a07820"/>
+      </radialGradient>
+    </defs>
+    <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="url(#gld)" opacity="0.9"/>
+    <text x="50" y="58" text-anchor="middle" font-family="serif" font-size="28" fill="#020818" font-weight="bold">Py</text>
+  </svg>
+
+  <div class="cover-label">Desde Cero · Paso a Paso</div>
+  <h1 class="cover-title">Guía de Conceptos<br>Generales de Python</h1>
+  <p class="cover-sub">Aprende los fundamentos del lenguaje más versátil del universo y crea tu primer diseño interactivo.</p>
+  <div class="cover-divider"></div>
+  <a href="#inicio" class="cover-cta">Comenzar el Viaje</a>
+
+  <div class="cover-scroll-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+    Desliza hacia abajo
+  </div>
+</section>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<div class="page-wrapper" id="inicio">
+
+  <!-- ─── SIDEBAR ─── -->
+  <nav class="sidebar">
+    <div class="sidebar-title">✦ Índice de Navegación</div>
+    <ul class="nav-list">
+      <li class="section-title"><a href="#cap1">I. Fundamentos</a></li>
+      <li><a href="#sec-intro"><span class="nav-badge"></span>¿Qué es Python?</a></li>
+      <li><a href="#sec-instalacion"><span class="nav-badge"></span>Instalación</a></li>
+      <li><a href="#sec-variables"><span class="nav-badge"></span>Variables y Tipos</a></li>
+
+      <li class="section-title"><a href="#cap2">II. Estructuras</a></li>
+      <li><a href="#sec-condicionales"><span class="nav-badge"></span>Condicionales</a></li>
+      <li><a href="#sec-bucles"><span class="nav-badge"></span>Bucles</a></li>
+      <li><a href="#sec-listas"><span class="nav-badge"></span>Listas y Diccionarios</a></li>
+
+      <li class="section-title"><a href="#cap3">III. Funciones</a></li>
+      <li><a href="#sec-funciones"><span class="nav-badge"></span>Definir Funciones</a></li>
+      <li><a href="#sec-modulos"><span class="nav-badge"></span>Módulos</a></li>
+
+      <li class="section-title"><a href="#cap4">IV. Proyecto Final</a></li>
+      <li><a href="#sec-objetivo"><span class="nav-badge"></span>Diseño Básico</a></li>
+      <li><a href="#sec-codigo-final"><span class="nav-badge"></span>Código Completo</a></li>
+    </ul>
+  </nav>
+
+  <!-- ─── CONTENT ─── -->
+  <main class="content">
+
+    <!-- ════ CAP 1 ════ -->
+    <article class="chapter" id="cap1">
+      <div class="chapter-header">
+        <span class="chapter-num">CAP. I</span>
+        <h2 class="chapter-title">Fundamentos de Python</h2>
+      </div>
+
+      <!-- Intro -->
+      <section class="section" id="sec-intro">
+        <h3 class="section-title">¿Qué es Python?</h3>
+        <p>Python es un lenguaje de programación de alto nivel, interpretado y de propósito general. Su filosofía de diseño hace énfasis en la legibilidad del código, usando indentación significativa para delimitar bloques.</p>
+        <p>Es uno de los lenguajes más populares del mundo: se usa en ciencia de datos, inteligencia artificial, desarrollo web, automatización, y mucho más.</p>
+        <div class="callout note">
+          <span class="callout-icon">✦</span>
+          <div class="callout-text"><strong>Dato clave:</strong> Python fue creado por Guido van Rossum y lanzado en 1991. Lleva su nombre por el grupo cómico Monty Python, no por la serpiente.</div>
+        </div>
+      </section>
+
+      <!-- Instalación -->
+      <section class="section" id="sec-instalacion">
+        <h3 class="section-title">Instalación del entorno</h3>
+        <p>Para comenzar a programar en Python solo necesitas tres cosas: el intérprete, un editor y tu primer archivo <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#7dd3fc;">.py</code>.</p>
+
+        <div class="code-block" data-lang="Terminal">
+          <pre><span class="cm"># 1. Descarga Python desde python.org</span>
+<span class="cm"># 2. Verifica la instalación:</span>
+<span class="fn">python</span> <span class="op">--version</span>
+<span class="cm"># → Python 3.12.x</span>
+
+<span class="cm"># 3. Abre el intérprete interactivo:</span>
+<span class="fn">python</span>
+<span class="op">>></span><span class="op">></span> <span class="fn">print</span>(<span class="str">"¡Hola, universo!"</span>)
+<span class="cm"># → ¡Hola, universo!</span></pre>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-text"><strong>Editores recomendados:</strong> VS Code (gratuito, extensión Python), PyCharm Community, o incluso el IDLE que viene incluido con Python.</div>
+        </div>
+      </section>
+
+      <!-- Variables -->
+      <section class="section" id="sec-variables">
+        <h3 class="section-title">Variables y Tipos de Datos</h3>
+        <p>Una variable es un contenedor con nombre que almacena un valor en memoria. En Python no se declara el tipo — se infiere automáticamente.</p>
+
+        <div class="code-block" data-lang="Python">
+          <pre><span class="cm"># Tipos básicos de datos</span>
+<span class="var">nombre</span>    <span class="op">=</span> <span class="str">"Astro"</span>           <span class="cm"># str  → texto</span>
+<span class="var">edad</span>      <span class="op">=</span> <span class="num">25</span>               <span class="cm"># int  → entero</span>
+<span class="var">altura</span>    <span class="op">=</span> <span class="num">1.75</span>             <span class="cm"># float → decimal</span>
+<span class="var">activo</span>    <span class="op">=</span> <span class="kw">True</span>             <span class="cm"># bool → verdadero/falso</span>
+
+<span class="cm"># Verificar el tipo</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="var">nombre</span>))          <span class="cm"># &lt;class 'str'&gt;</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="var">edad</span>))            <span class="cm"># &lt;class 'int'&gt;</span>
+
+<span class="cm"># Conversión de tipos (casting)</span>
+<span class="var">edad_texto</span> <span class="op">=</span> <span class="fn">str</span>(<span class="var">edad</span>)       <span class="cm"># "25"</span>
+<span class="var">numero</span>     <span class="op">=</span> <span class="fn">int</span>(<span class="str">"42"</span>)       <span class="cm"># 42</span></pre>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Tipo</th><th>Ejemplo</th><th>Descripción</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>str</td><td>"Hola"</td><td>Cadena de texto</td></tr>
+            <tr><td>int</td><td>42</td><td>Número entero</td></tr>
+            <tr><td>float</td><td>3.14</td><td>Número decimal</td></tr>
+            <tr><td>bool</td><td>True / False</td><td>Verdadero o falso</td></tr>
+            <tr><td>NoneType</td><td>None</td><td>Ausencia de valor</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </article>
+
+    <!-- ════ CAP 2 ════ -->
+    <article class="chapter" id="cap2">
+      <div class="chapter-header">
+        <span class="chapter-num">CAP. II</span>
+        <h2 class="chapter-title">Estructuras de Control</h2>
+      </div>
+
+      <!-- Condicionales -->
+      <section class="section" id="sec-condicionales">
+        <h3 class="section-title">Condicionales (if / elif / else)</h3>
+        <p>Los condicionales permiten tomar decisiones: ejecutar un bloque de código solo si se cumple una condición.</p>
+
+        <div class="code-block" data-lang="Python">
+          <pre><span class="var">temperatura</span> <span class="op">=</span> <span class="num">22</span>
+
+<span class="kw">if</span> <span class="var">temperatura</span> <span class="op">&gt;</span> <span class="num">30</span><span class="op">:</span>
+    <span class="fn">print</span>(<span class="str">"Hace calor 🌞"</span>)
+<span class="kw">elif</span> <span class="var">temperatura</span> <span class="op">&gt;</span> <span class="num">15</span><span class="op">:</span>
+    <span class="fn">print</span>(<span class="str">"Temperatura agradable ✨"</span>)
+<span class="kw">else</span><span class="op">:</span>
+    <span class="fn">print</span>(<span class="str">"Hace frío 🌙"</span>)
+
+<span class="cm"># → Temperatura agradable ✨</span>
+
+<span class="cm"># Operadores de comparación</span>
+<span class="cm"># ==  igual a        !=  diferente de</span>
+<span class="cm"># &gt;   mayor que      &lt;   menor que</span>
+<span class="cm"># &gt;=  mayor o igual  &lt;=  menor o igual</span></pre>
+        </div>
+      </section>
+
+      <!-- Bucles -->
+      <section class="section" id="sec-bucles">
+        <h3 class="section-title">Bucles (for / while)</h3>
+        <p>Los bucles repiten un bloque de código múltiples veces. <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#7dd3fc;">for</code> itera sobre una secuencia; <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#7dd3fc;">while</code> repite mientras una condición sea verdadera.</p>
+
+        <div class="code-block" data-lang="Python">
+          <pre><span class="cm"># Bucle for con range()</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">6</span>)<span class="op">:</span>
+    <span class="fn">print</span>(<span class="str">f"Estrella </span><span class="op">{</span><span class="var">i</span><span class="op">}</span><span class="str"> ✦"</span>)
+<span class="cm"># → Estrella 1 ✦  ...  Estrella 5 ✦</span>
+
+<span class="cm"># Bucle while</span>
+<span class="var">contador</span> <span class="op">=</span> <span class="num">0</span>
+<span class="kw">while</span> <span class="var">contador</span> <span class="op">&lt;</span> <span class="num">3</span><span class="op">:</span>
+    <span class="fn">print</span>(<span class="str">f"Vuelta {</span><span class="var">contador</span><span class="str">}"</span>)
+    <span class="var">contador</span> <span class="op">+=</span> <span class="num">1</span>
+
+<span class="cm"># Control de bucles</span>
+<span class="kw">for</span> <span class="var">n</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)<span class="op">:</span>
+    <span class="kw">if</span> <span class="var">n</span> <span class="op">==</span> <span class="num">5</span><span class="op">:</span>
+        <span class="kw">break</span>          <span class="cm"># detiene el bucle</span>
+    <span class="kw">if</span> <span class="var">n</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span><span class="op">:</span>
+        <span class="kw">continue</span>       <span class="cm"># salta esta iteración</span>
+    <span class="fn">print</span>(<span class="var">n</span>)</pre>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-text"><strong>f-strings:</strong> La sintaxis <code style="font-family:'JetBrains Mono',monospace;font-size:0.82em;">f"texto {variable}"</code> es la forma moderna de insertar variables dentro de cadenas. ¡Úsala siempre!</div>
+        </div>
+      </section>
+
+      <!-- Listas -->
+      <section class="section" id="sec-listas">
+        <h3 class="section-title">Listas y Diccionarios</h3>
+        <p>Las <strong style="color:#ffd700;">listas</strong> almacenan colecciones ordenadas de elementos. Los <strong style="color:#ffd700;">diccionarios</strong> almacenan pares clave-valor.</p>
+
+        <div class="code-block" data-lang="Python">
+          <pre><span class="cm"># ── Listas ──────────────────────────────</span>
+<span class="var">colores</span> <span class="op">=</span> [<span class="str">"dorado"</span>, <span class="str">"azul marino"</span>, <span class="str">"blanco"</span>]
+
+<span class="var">colores</span>.<span class="fn">append</span>(<span class="str">"negro"</span>)       <span class="cm"># agrega al final</span>
+<span class="fn">print</span>(<span class="var">colores</span>[<span class="num">0</span>])              <span class="cm"># "dorado" (índice 0)</span>
+<span class="fn">print</span>(<span class="fn">len</span>(<span class="var">colores</span>))            <span class="cm"># 4</span>
+
+<span class="kw">for</span> <span class="var">color</span> <span class="kw">in</span> <span class="var">colores</span><span class="op">:</span>
+    <span class="fn">print</span>(<span class="str">f"Color: {</span><span class="var">color</span><span class="str">}"</span>)
+
+<span class="cm"># ── Diccionarios ────────────────────────</span>
+<span class="var">perfil</span> <span class="op">=</span> {
+    <span class="str">"nombre"</span><span class="op">:</span> <span class="str">"Astro Dev"</span>,
+    <span class="str">"rol"</span><span class="op">:</span>    <span class="str">"Programador"</span>,
+    <span class="str">"nivel"</span><span class="op">:</span>  <span class="num">1</span>
+}
+
+<span class="fn">print</span>(<span class="var">perfil</span>[<span class="str">"nombre"</span>])         <span class="cm"># "Astro Dev"</span>
+<span class="var">perfil</span>[<span class="str">"nivel"</span>] <span class="op">=</span> <span class="num">2</span>            <span class="cm"># actualiza valor</span>
+
+<span class="kw">for</span> <span class="var">clave</span>, <span class="var">valor</span> <span class="kw">in</span> <span class="var">perfil</span>.<span class="fn">items</span>()<span class="op">:</span>
+    <span class="fn">print</span>(<span class="str">f"{</span><span class="var">clave</span><span class="str">}: {</span><span class="var">valor</span><span class="str">}"</span>)</pre>
+        </div>
+      </section>
+    </article>
+
+    <!-- ════ CAP 3 ════ -->
+    <article class="chapter" id="cap3">
+      <div class="chapter-header">
+        <span class="chapter-num">CAP. III</span>
+        <h2 class="chapter-title">Funciones y Módulos</h2>
+      </div>
+
+      <!-- Funciones -->
+      <section class="section" id="sec-funciones">
+        <h3 class="section-title">Definir y Usar Funciones</h3>
+        <p>Una función es un bloque de código reutilizable con un nombre. Se define con <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#ff9ecb;">def</code> y puede recibir parámetros y retornar valores.</p>
+
+        <div class="code-block" data-lang="Python">
+          <pre><span class="cm"># Función básica</span>
+<span class="kw">def</span> <span class="fn">saludar</span>(<span class="var">nombre</span>)<span class="op">:</span>
+    <span class="kw">return</span> <span class="str">f"✦ Bienvenido al cosmos, {</span><span class="var">nombre</span><span class="str">}!"</span>
+
+<span class="fn">print</span>(<span class="fn">saludar</span>(<span class="str">"Explorador"</span>))
+<span class="cm"># → ✦ Bienvenido al cosmos, Explorador!</span>
+
+<span class="cm"># Función con parámetros por defecto</span>
+<span class="kw">def</span> <span class="fn">crear_tarjeta</span>(<span class="var">nombre</span>, <span class="var">rol</span><span class="op">=</span><span class="str">"Desarrollador"</span>)<span class="op">:</span>
+    <span class="var">linea</span> <span class="op">=</span> <span class="str">"─"</span> <span class="op">*</span> <span class="num">30</span>
+    <span class="kw">return</span> <span class="str">f"\n{</span><span class="var">linea</span><span class="str">}\n  {</span><span class="var">nombre</span><span class="str">}\n  {</span><span class="var">rol</span><span class="str">}\n{</span><span class="var">linea</span><span class="str">}"</span>
+
+<span class="fn">print</span>(<span class="fn">crear_tarjeta</span>(<span class="str">"Ana García"</span>))
+<span class="fn">print</span>(<span class="fn">crear_tarjeta</span>(<span class="str">"Luis Vega"</span>, <span class="str">"Diseñador"</span>))
+
+<span class="cm"># Función con *args (múltiples argumentos)</span>
+<span class="kw">def</span> <span class="fn">sumar_todo</span>(<span class="op">*</span><span class="var">numeros</span>)<span class="op">:</span>
+    <span class="kw">return</span> <span class="fn">sum</span>(<span class="var">numeros</span>)
+
+<span class="fn">print</span>(<span class="fn">sumar_todo</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>))  <span class="cm"># → 15</span></pre>
+        </div>
+      </section>
+
+      <!-- Módulos -->
+      <section class="section" id="sec-modulos">
+        <h3 class="section-title">Módulos de la Biblioteca Estándar</h3>
+        <p>Python viene con una enorme biblioteca de módulos listos para usar. Solo necesitas importarlos con <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#ff9ecb;">import</code>.</p>
+
+        <div class="code-block" data-lang="Python">
+          <pre><span class="kw">import</span> <span class="var">random</span>
+<span class="kw">import</span> <span class="var">math</span>
+<span class="kw">from</span> <span class="var">datetime</span> <span class="kw">import</span> <span class="var">datetime</span>
+
+<span class="cm"># random: números aleatorios</span>
+<span class="var">dado</span> <span class="op">=</span> <span class="var">random</span>.<span class="fn">randint</span>(<span class="num">1</span>, <span class="num">6</span>)
+<span class="fn">print</span>(<span class="str">f"Dado: {</span><span class="var">dado</span><span class="str">}"</span>)
+
+<span class="cm"># math: funciones matemáticas</span>
+<span class="fn">print</span>(<span class="var">math</span>.<span class="fn">sqrt</span>(<span class="num">16</span>))          <span class="cm"># → 4.0</span>
+<span class="fn">print</span>(<span class="var">math</span>.<span class="fn">pi</span>)               <span class="cm"># → 3.14159...</span>
+
+<span class="cm"># datetime: fecha y hora actual</span>
+<span class="var">ahora</span> <span class="op">=</span> <span class="var">datetime</span>.<span class="fn">now</span>()
+<span class="fn">print</span>(<span class="str">f"Hoy es: {</span><span class="var">ahora</span>.<span class="fn">strftime</span>(<span class="str">'%d/%m/%Y'</span>)<span class="str">}"</span>)</pre>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-icon">✦</span>
+          <div class="callout-text"><strong>Módulos esenciales para conocer:</strong> <code style="font-family:'JetBrains Mono',monospace;font-size:0.82em;">os</code> (sistema de archivos), <code style="font-family:'JetBrains Mono',monospace;font-size:0.82em;">json</code> (datos JSON), <code style="font-family:'JetBrains Mono',monospace;font-size:0.82em;">sys</code> (sistema), <code style="font-family:'JetBrains Mono',monospace;font-size:0.82em;">re</code> (expresiones regulares).</div>
+        </div>
+      </section>
+    </article>
+
+    <!-- ════ CAP 4: PROYECTO FINAL ════ -->
+    <article class="chapter" id="cap4">
+      <div class="chapter-header">
+        <span class="chapter-num">CAP. IV</span>
+        <h2 class="chapter-title">Proyecto: Diseño Básico</h2>
+      </div>
+
+      <div class="callout goal">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-text"><strong>Objetivo de la guía:</strong> Usando todos los conceptos aprendidos — variables, condicionales, bucles, listas, funciones y módulos — vamos a construir un generador de tarjeta de presentación de texto con paleta de colores personalizable.</div>
+      </div>
+
+      <!-- Objetivo visual -->
+      <section class="section" id="sec-objetivo">
+        <h3 class="section-title">Resultado Esperado</h3>
+        <p>El programa pedirá datos al usuario y generará una tarjeta de presentación formateada con colores en la terminal. Así se verá el resultado final:</p>
+
+        <div class="result-box">
+          <div class="result-box-title">✦ Vista previa del resultado</div>
+          <div class="demo-card">
+            <div class="demo-stars">✦ ✦ ✦ ✦ ✦</div>
+            <h3 id="demo-nombre">Ana García</h3>
+            <p id="demo-rol">Desarrolladora Python</p>
+            <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem;">
+              <button class="demo-btn" onclick="generarTarjeta()">▶ Generar Tarjeta</button>
+              <button class="demo-btn" onclick="cambiarUsuario()">↺ Nuevo Usuario</button>
+            </div>
+            <div class="demo-output" id="demo-output">
+              — Presiona "Generar Tarjeta" para ver la salida —
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Código final -->
+      <section class="section" id="sec-codigo-final">
+        <h3 class="section-title">Código Completo del Proyecto</h3>
+        <p>Aquí está el programa completo. Cada línea usa conceptos que aprendiste en esta guía:</p>
+
+        <div class="code-block" data-lang="Python · Proyecto Final">
+          <pre><span class="cm">"""
+╔══════════════════════════════════════════╗
+║   GENERADOR DE TARJETA DE PRESENTACIÓN  ║
+║   Proyecto Final · Guía Python Básico   ║
+╚══════════════════════════════════════════╝
+"""</span>
+<span class="kw">import</span> <span class="var">random</span>
+<span class="kw">from</span> <span class="var">datetime</span> <span class="kw">import</span> <span class="var">datetime</span>
+
+<span class="cm"># ── Datos de la paleta (diccionario) ────</span>
+<span class="var">PALETA</span> <span class="op">=</span> {
+    <span class="str">"azul_marino"</span><span class="op">:</span> <span class="str">"\033[34m"</span>,
+    <span class="str">"dorado"</span><span class="op">:</span>     <span class="str">"\033[33m"</span>,
+    <span class="str">"blanco"</span><span class="op">:</span>     <span class="str">"\033[97m"</span>,
+    <span class="str">"reset"</span><span class="op">:</span>      <span class="str">"\033[0m"</span>
+}
+
+<span class="cm"># ── Habilidades disponibles (lista) ─────</span>
+<span class="var">habilidades_base</span> <span class="op">=</span> [
+    <span class="str">"Python"</span>, <span class="str">"HTML/CSS"</span>, <span class="str">"Git"</span>,
+    <span class="str">"JavaScript"</span>, <span class="str">"SQL"</span>, <span class="str">"Linux"</span>
+]
+
+<span class="cm"># ── Función: dibujar borde ───────────────</span>
+<span class="kw">def</span> <span class="fn">borde</span>(<span class="var">ancho</span><span class="op">=</span><span class="num">42</span>)<span class="op">:</span>
+    <span class="var">dorado</span> <span class="op">=</span> <span class="var">PALETA</span>[<span class="str">"dorado"</span>]
+    <span class="var">reset</span>  <span class="op">=</span> <span class="var">PALETA</span>[<span class="str">"reset"</span>]
+    <span class="kw">return</span> <span class="str">f"{</span><span class="var">dorado</span><span class="str">}{'═' * </span><span class="var">ancho</span><span class="str">}{</span><span class="var">reset</span><span class="str">}"</span>
+
+<span class="cm"># ── Función: centrar texto ───────────────</span>
+<span class="kw">def</span> <span class="fn">centrar</span>(<span class="var">texto</span>, <span class="var">ancho</span><span class="op">=</span><span class="num">40</span>, <span class="var">color</span><span class="op">=</span><span class="str">"blanco"</span>)<span class="op">:</span>
+    <span class="var">c</span> <span class="op">=</span> <span class="var">PALETA</span>.<span class="fn">get</span>(<span class="var">color</span>, <span class="str">""</span>)
+    <span class="var">r</span> <span class="op">=</span> <span class="var">PALETA</span>[<span class="str">"reset"</span>]
+    <span class="kw">return</span> <span class="str">f"{</span><span class="var">c</span><span class="str">}{</span><span class="var">texto</span>.<span class="fn">center</span>(<span class="var">ancho</span>)<span class="str">}{</span><span class="var">r</span><span class="str">}"</span>
+
+<span class="cm"># ── Función: generar estrellas aleatorias ─</span>
+<span class="kw">def</span> <span class="fn">estrellas</span>(<span class="var">n</span><span class="op">=</span><span class="num">5</span>)<span class="op">:</span>
+    <span class="var">opciones</span> <span class="op">=</span> [<span class="str">"✦"</span>, <span class="str">"★"</span>, <span class="str">"✧"</span>, <span class="str">"◆"</span>]
+    <span class="kw">return</span> <span class="str">" "</span>.<span class="fn">join</span>([<span class="var">random</span>.<span class="fn">choice</span>(<span class="var">opciones</span>) <span class="kw">for</span> <span class="var">_</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">n</span>)])
+
+<span class="cm"># ── Función principal: generar tarjeta ───</span>
+<span class="kw">def</span> <span class="fn">generar_tarjeta</span>(<span class="var">nombre</span>, <span class="var">rol</span>, <span class="var">skills</span>)<span class="op">:</span>
+    <span class="var">fecha</span> <span class="op">=</span> <span class="var">datetime</span>.<span class="fn">now</span>().<span class="fn">strftime</span>(<span class="str">"%d/%m/%Y"</span>)
+    
+    <span class="fn">print</span>(<span class="fn">borde</span>())
+    <span class="fn">print</span>(<span class="fn">centrar</span>(<span class="fn">estrellas</span>(), <span class="var">color</span><span class="op">=</span><span class="str">"dorado"</span>))
+    <span class="fn">print</span>(<span class="fn">centrar</span>(<span class="var">nombre</span>.<span class="fn">upper</span>(), <span class="var">color</span><span class="op">=</span><span class="str">"dorado"</span>))
+    <span class="fn">print</span>(<span class="fn">centrar</span>(<span class="var">rol</span>))
+    <span class="fn">print</span>(<span class="fn">centrar</span>(<span class="str">"─" * <span class="num">20</span></span>, <span class="var">color</span><span class="op">=</span><span class="str">"azul_marino"</span>))
+    
+    <span class="cm"># Mostrar habilidades con bucle</span>
+    <span class="kw">for</span> <span class="var">skill</span> <span class="kw">in</span> <span class="var">skills</span><span class="op">:</span>
+        <span class="fn">print</span>(<span class="fn">centrar</span>(<span class="str">f"◆ {</span><span class="var">skill</span><span class="str">}"</span>, <span class="var">color</span><span class="op">=</span><span class="str">"azul_marino"</span>))
+    
+    <span class="fn">print</span>(<span class="fn">centrar</span>(<span class="str">"─" * <span class="num">20</span></span>, <span class="var">color</span><span class="op">=</span><span class="str">"azul_marino"</span>))
+    <span class="fn">print</span>(<span class="fn">centrar</span>(<span class="str">f"Generado: {</span><span class="var">fecha</span><span class="str">}"</span>))
+    <span class="fn">print</span>(<span class="fn">borde</span>())
+
+<span class="cm"># ── Programa principal ───────────────────</span>
+<span class="kw">if</span> <span class="var">__name__</span> <span class="op">==</span> <span class="str">"__main__"</span><span class="op">:</span>
+    <span class="fn">print</span>(<span class="fn">centrar</span>(<span class="str">"GENERADOR DE TARJETAS"</span>, <span class="var">color</span><span class="op">=</span><span class="str">"dorado"</span>))
+    
+    <span class="cm"># Input del usuario</span>
+    <span class="var">nombre</span> <span class="op">=</span> <span class="fn">input</span>(<span class="str">"Tu nombre: "</span>)
+    <span class="var">rol</span>    <span class="op">=</span> <span class="fn">input</span>(<span class="str">"Tu rol: "</span>)
+    
+    <span class="cm"># Seleccionar 3 habilidades aleatorias</span>
+    <span class="var">mis_skills</span> <span class="op">=</span> <span class="var">random</span>.<span class="fn">sample</span>(<span class="var">habilidades_base</span>, <span class="num">3</span>)
+    
+    <span class="cm"># Validación con condicional</span>
+    <span class="kw">if</span> <span class="var">nombre</span> <span class="kw">and</span> <span class="var">rol</span><span class="op">:</span>
+        <span class="fn">generar_tarjeta</span>(<span class="var">nombre</span>, <span class="var">rol</span>, <span class="var">mis_skills</span>)
+    <span class="kw">else</span><span class="op">:</span>
+        <span class="fn">print</span>(<span class="str">"⚠ Por favor ingresa nombre y rol."</span>)</pre>
+        </div>
+
+        <div class="callout goal">
+          <span class="callout-icon">🏆</span>
+          <div class="callout-text">
+            <strong>¡Felicitaciones!</strong> Con este proyecto pusiste en práctica:
+            variables, tipos de datos, diccionarios, listas, bucles for, condicionales if/else, funciones con parámetros, módulos random y datetime, f-strings, y el bloque <code style="font-family:'JetBrains Mono',monospace;font-size:0.82em;">if __name__ == "__main__"</code>.
+          </div>
+        </div>
+      </section>
+
+      <!-- Final goal box -->
+      <div class="final-goal" id="sec-meta">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">✦</div>
+        <h2>Misión Completada</h2>
+        <p style="color:var(--text-muted);max-width:480px;margin:1rem auto 0;">
+          Ahora conoces los fundamentos de Python: desde variables hasta funciones y módulos. El siguiente paso es explorar la programación orientada a objetos, las clases y los frameworks como Flask o Tkinter.
+        </p>
+        <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <a href="#inicio" class="cover-cta">↑ Volver al inicio</a>
+          <a href="index.html" class="cover-cta">← Portafolio</a>
+        </div>
+      </div>
+
+    </article>
+  </main>
+</div>
+
+<!-- ══════════════════ JS ══════════════════ -->
+<script>
+  /* ─── Stars ─── */
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 220; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.2,
+        a: Math.random(),
+        speed: Math.random() * 0.004 + 0.001,
+        gold: Math.random() < 0.08
+      });
+    }
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.a += s.speed;
+      const alpha = (Math.sin(s.a) + 1) / 2 * 0.8 + 0.1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = s.gold
+        ? `rgba(255,215,0,${alpha * 0.9})`
+        : `rgba(200,220,255,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+
+  resize();
+  initStars();
+  drawStars();
+  window.addEventListener('resize', () => { resize(); initStars(); });
+
+  /* ─── Demo interactive ─── */
+  const usuarios = [
+    { nombre: "Ana García", rol: "Desarrolladora Python" },
+    { nombre: "Carlos Vega", rol: "Data Scientist" },
+    { nombre: "María Luna", rol: "Backend Engineer" },
+    { nombre: "Diego Stars", rol: "Full Stack Dev" },
+  ];
+  let idxUsuario = 0;
+
+  function cambiarUsuario() {
+    idxUsuario = (idxUsuario + 1) % usuarios.length;
+    document.getElementById('demo-nombre').textContent = usuarios[idxUsuario].nombre;
+    document.getElementById('demo-rol').textContent = usuarios[idxUsuario].rol;
+    document.getElementById('demo-output').textContent = '— Presiona "Generar Tarjeta" —';
+  }
+
+  function generarTarjeta() {
+    const u = usuarios[idxUsuario];
+    const skills = ["Python","HTML/CSS","Git","JavaScript","SQL","Linux"];
+    const sel = [...skills].sort(() => Math.random()-0.5).slice(0,3);
+    const estrellas = ["✦","★","✧","◆"].sort(() => Math.random()-0.5).slice(0,5).join(" ");
+    const fecha = new Date().toLocaleDateString("es-MX");
+    const linea = "═".repeat(36);
+
+    document.getElementById('demo-output').innerHTML =
+      `<span style="color:#c9a227">${linea}</span>\n` +
+      `<span style="color:#ffd700">  ${estrellas.padStart(20)}</span>\n` +
+      `<span style="color:#ffd700">  ${u.nombre.toUpperCase().padStart(20)}</span>\n` +
+      `<span style="color:#cdd5f0">  ${u.rol.padStart(20)}</span>\n` +
+      `<span style="color:#4a80c4">  ${"─".repeat(28)}</span>\n` +
+      sel.map(s => `<span style="color:#7dd3fc">  ◆ ${s}</span>`).join("\n") + "\n" +
+      `<span style="color:#4a80c4">  ${"─".repeat(28)}</span>\n` +
+      `<span style="color:#6b7db3">  Generado: ${fecha}</span>\n` +
+      `<span style="color:#c9a227">${linea}</span>`;
+  }
+</script>
+</body>
+</html>

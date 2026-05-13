@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Componentes de Arduino – Guía desde Cero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0e14;
+      --bg2: #0f1520;
+      --card: #131c28;
+      --border: #1e3a5f;
+      --teal: #00d4aa;
+      --teal2: #00ffcc;
+      --blue: #0080ff;
+      --orange: #ff6b2b;
+      --yellow: #ffd166;
+      --text: #c8d8e8;
+      --muted: #5a7a9a;
+      --white: #f0f8ff;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Barlow', sans-serif;
+      --cond: 'Barlow Condensed', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+    }
+
+    /* ── BOTÓN RETORNO ── */
+    .btn-back {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(10,14,20,0.85);
+      border: 1px solid var(--teal);
+      color: var(--teal);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      padding: 8px 16px;
+      cursor: pointer;
+      text-decoration: none;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      transition: background 0.2s, color 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    .btn-back:hover {
+      background: var(--teal);
+      color: var(--bg);
+    }
+    .btn-back svg { width: 14px; height: 14px; }
+
+    /* ── HERO / PORTADA ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* Circuit board SVG background */
+    .circuit-bg {
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    /* Glow orb */
+    .glow-orb {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,212,170,0.18) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.8; }
+      50% { transform: translate(-50%,-50%) scale(1.12); opacity: 1; }
+    }
+
+    /* Grid lines */
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,170,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,170,0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* Scan line */
+    .scan-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--teal), transparent);
+      opacity: 0.4;
+      animation: scan 6s linear infinite;
+    }
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+
+    /* Chip illustration */
+    .chip-illustration {
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.15;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      color: var(--teal);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .hero-tag::before, .hero-tag::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 1px;
+      background: var(--teal);
+    }
+
+    .hero-title {
+      font-family: var(--cond);
+      font-size: clamp(2.8rem, 8vw, 6.5rem);
+      font-weight: 900;
+      line-height: 0.92;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      margin-bottom: 1rem;
+    }
+    .hero-title .accent { color: var(--teal); }
+    .hero-title .line2 {
+      display: block;
+      -webkit-text-stroke: 1.5px var(--teal);
+      color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 300;
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      padding: 5px 14px;
+      border: 1px solid;
+      text-transform: uppercase;
+    }
+    .badge.teal { border-color: var(--teal); color: var(--teal); }
+    .badge.orange { border-color: var(--orange); color: var(--orange); }
+    .badge.yellow { border-color: var(--yellow); color: var(--yellow); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .scroll-arrow {
+      width: 20px;
+      height: 30px;
+      border: 1px solid var(--muted);
+      border-radius: 10px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 5px;
+    }
+    .scroll-dot {
+      width: 3px;
+      height: 6px;
+      background: var(--teal);
+      border-radius: 2px;
+      animation: scrolldot 1.5s ease-in-out infinite;
+    }
+    @keyframes scrolldot {
+      0%, 100% { transform: translateY(0); opacity: 1; }
+      50% { transform: translateY(10px); opacity: 0.2; }
+    }
+
+    /* ── LAYOUT MAIN ── */
+    .page-body {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* ── SIDEBAR NAV ── */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 2.5rem 0;
+      scrollbar-width: none;
+    }
+    .sidebar::-webkit-scrollbar { display: none; }
+
+    .sidebar-logo {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--teal);
+      letter-spacing: 0.15em;
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-logo-dot {
+      width: 8px; height: 8px;
+      background: var(--teal);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--teal);
+      flex-shrink: 0;
+    }
+
+    .nav-section {
+      padding: 1.5rem 0;
+    }
+    .nav-section-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 0 1.5rem 0.75rem;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 400;
+      transition: color 0.15s, background 0.15s;
+      border-left: 2px solid transparent;
+      position: relative;
+    }
+    .nav-link:hover {
+      color: var(--teal);
+      background: rgba(0,212,170,0.04);
+      border-left-color: var(--teal);
+    }
+    .nav-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      min-width: 20px;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      padding: 4rem 3rem 6rem;
+      max-width: 860px;
+    }
+
+    /* Section headers */
+    .section {
+      margin-bottom: 5rem;
+    }
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-num {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--teal);
+      background: rgba(0,212,170,0.08);
+      border: 1px solid rgba(0,212,170,0.3);
+      padding: 3px 8px;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-family: var(--cond);
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+    }
+    .section-title span { color: var(--teal); }
+
+    p { line-height: 1.8; font-size: 0.93rem; color: var(--text); margin-bottom: 1rem; }
+
+    /* Cards grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--teal);
+    }
+    .card.orange::before { background: var(--orange); }
+    .card.yellow::before { background: var(--yellow); }
+    .card.blue::before { background: var(--blue); }
+
+    .card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .card-title {
+      font-family: var(--cond);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+    .card-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Step list */
+    .steps {
+      counter-reset: steps;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .step {
+      counter-increment: steps;
+      display: flex;
+      gap: 1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1rem 1.2rem;
+    }
+    .step::before {
+      content: counter(steps, decimal-leading-zero);
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      color: var(--teal);
+      flex-shrink: 0;
+      width: 2rem;
+      opacity: 0.6;
+    }
+    .step-content h4 {
+      font-family: var(--cond);
+      font-size: 0.95rem;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .step-content p { margin: 0; font-size: 0.82rem; }
+
+    /* Tip box */
+    .tip {
+      background: rgba(0,212,170,0.06);
+      border: 1px solid rgba(0,212,170,0.25);
+      border-left: 3px solid var(--teal);
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      font-size: 0.84rem;
+    }
+    .tip strong { color: var(--teal); font-family: var(--mono); font-size: 0.75rem; }
+
+    .warning {
+      background: rgba(255,107,43,0.06);
+      border: 1px solid rgba(255,107,43,0.25);
+      border-left: 3px solid var(--orange);
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      font-size: 0.84rem;
+    }
+    .warning strong { color: var(--orange); font-family: var(--mono); font-size: 0.75rem; }
+
+    /* Code block */
+    .code-block {
+      background: #070b10;
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--teal);
+      padding: 1.2rem 1.5rem;
+      margin: 1.2rem 0;
+      overflow-x: auto;
+    }
+    .code-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .code-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    pre {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: #c8d8e8;
+      line-height: 1.7;
+      white-space: pre;
+    }
+    .kw { color: #ff79c6; }
+    .fn { color: #50fa7b; }
+    .num { color: #f1fa8c; }
+    .cmt { color: #6272a4; }
+    .str { color: #f1c40f; }
+
+    /* Pin table */
+    .pin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.2rem 0;
+      font-size: 0.82rem;
+    }
+    .pin-table th {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--teal);
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,212,170,0.04);
+    }
+    .pin-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(30,58,95,0.5);
+      color: var(--text);
+    }
+    .pin-table tr:hover td { background: rgba(0,212,170,0.03); }
+    .pin-color { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+    /* Project final */
+    .project-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      margin: 1.5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-box::after {
+      content: 'PROYECTO';
+      position: absolute;
+      top: 1rem; right: 1rem;
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--teal);
+      letter-spacing: 0.2em;
+      border: 1px solid var(--teal);
+      padding: 2px 8px;
+    }
+    .project-box h3 {
+      font-family: var(--cond);
+      font-size: 1.4rem;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    /* Breadboard SVG circuit */
+    .circuit-diagram {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #070b10;
+      border: 1px solid var(--border);
+    }
+    .diagram-label {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    /* Material list */
+    .material-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .material-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+    }
+    .material-item::before {
+      content: '▸';
+      color: var(--teal);
+      font-size: 0.7rem;
+    }
+    .material-qty {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--orange);
+      min-width: 30px;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 3rem 0;
+      position: relative;
+    }
+    .divider::after {
+      content: '◆';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      background: var(--bg);
+      padding: 0 12px;
+      color: var(--teal);
+      font-size: 0.5rem;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 2rem 3rem;
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+    .footer-dot {
+      width: 6px; height: 6px;
+      background: var(--teal);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--teal);
+    }
+
+    @media (max-width: 768px) {
+      .page-body { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .main { padding: 2rem 1.2rem 4rem; }
+      .hero-title { font-size: 2.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Botón retorno portafolio -->
+<a href="index.html" class="btn-back">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  PORTAFOLIO
+</a>
+
+<!-- ══════════ HERO / PORTADA ══════════ -->
+<section class="hero">
+  <div class="grid-lines"></div>
+  <div class="glow-orb"></div>
+  <div class="scan-line"></div>
+
+  <!-- Circuit board background SVG -->
+  <svg class="circuit-bg" viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <!-- Horizontal traces -->
+    <line x1="0" y1="120" x2="400" y2="120" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="450" y1="120" x2="1400" y2="120" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="0" y1="300" x2="250" y2="300" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="300" y1="300" x2="900" y2="300" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="0" y1="500" x2="1400" y2="500" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="0" y1="680" x2="600" y2="680" stroke="#00d4aa" stroke-width="1"/>
+    <!-- Vertical traces -->
+    <line x1="200" y1="0" x2="200" y2="300" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="200" y1="350" x2="200" y2="800" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="120" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="600" y1="170" x2="600" y2="500" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="1000" y1="120" x2="1000" y2="500" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="1200" y1="0" x2="1200" y2="800" stroke="#00d4aa" stroke-width="1"/>
+    <!-- Via dots -->
+    <circle cx="200" cy="120" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <circle cx="600" cy="120" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <circle cx="1000" cy="120" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <circle cx="200" cy="300" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <circle cx="600" cy="300" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <circle cx="200" cy="500" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <circle cx="600" cy="500" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <circle cx="1000" cy="500" r="5" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <!-- IC chip shapes -->
+    <rect x="350" y="80" width="80" height="80" rx="4" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="360" y1="95" x2="340" y2="95" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="360" y1="110" x2="340" y2="110" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="360" y1="125" x2="340" y2="125" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="420" y1="95" x2="440" y2="95" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="420" y1="110" x2="440" y2="110" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="420" y1="125" x2="440" y2="125" stroke="#00d4aa" stroke-width="1"/>
+    <!-- resistors -->
+    <rect x="850" y="295" width="60" height="10" rx="2" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="840" y1="300" x2="850" y2="300" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="910" y1="300" x2="920" y2="300" stroke="#00d4aa" stroke-width="1"/>
+    <!-- Capacitors -->
+    <line x1="590" y1="395" x2="610" y2="395" stroke="#00d4aa" stroke-width="2"/>
+    <line x1="590" y1="405" x2="610" y2="405" stroke="#00d4aa" stroke-width="2"/>
+    <line x1="600" y1="380" x2="600" y2="395" stroke="#00d4aa" stroke-width="1"/>
+    <line x1="600" y1="405" x2="600" y2="420" stroke="#00d4aa" stroke-width="1"/>
+  </svg>
+
+  <!-- Chip illustration right side -->
+  <svg class="chip-illustration" width="300" height="400" viewBox="0 0 300 400">
+    <rect x="80" y="80" width="140" height="180" rx="6" fill="none" stroke="#00d4aa" stroke-width="2"/>
+    <rect x="95" y="95" width="110" height="150" rx="3" fill="rgba(0,212,170,0.05)" stroke="#00d4aa" stroke-width="1"/>
+    <text x="150" y="178" text-anchor="middle" font-family="Share Tech Mono" font-size="14" fill="#00d4aa">ATmega</text>
+    <text x="150" y="196" text-anchor="middle" font-family="Share Tech Mono" font-size="14" fill="#00d4aa">328P</text>
+    <!-- Left pins -->
+    <line x1="30" y1="110" x2="80" y2="110" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="30" y1="135" x2="80" y2="135" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="30" y1="160" x2="80" y2="160" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="30" y1="185" x2="80" y2="185" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="30" y1="210" x2="80" y2="210" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="30" y1="235" x2="80" y2="235" stroke="#00d4aa" stroke-width="1.5"/>
+    <!-- Right pins -->
+    <line x1="220" y1="110" x2="270" y2="110" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="220" y1="135" x2="270" y2="135" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="220" y1="160" x2="270" y2="160" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="220" y1="185" x2="270" y2="185" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="220" y1="210" x2="270" y2="210" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="220" y1="235" x2="270" y2="235" stroke="#00d4aa" stroke-width="1.5"/>
+    <!-- Pin labels left -->
+    <text x="38" y="107" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">GND</text>
+    <text x="38" y="132" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">VCC</text>
+    <text x="42" y="157" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">D0</text>
+    <text x="42" y="182" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">D1</text>
+    <text x="42" y="207" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">A0</text>
+    <text x="42" y="232" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">A1</text>
+    <!-- Pin labels right -->
+    <text x="228" y="107" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">RST</text>
+    <text x="228" y="132" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">D13</text>
+    <text x="228" y="157" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">D12</text>
+    <text x="228" y="182" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">D11</text>
+    <text x="228" y="207" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">D10</text>
+    <text x="228" y="232" font-family="Share Tech Mono" font-size="8" fill="#00d4aa" opacity="0.7">SCL</text>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-tag">Guía Práctica · Desde Cero</div>
+    <h1 class="hero-title">
+      <span class="accent">Conceptos</span><br>
+      Generales de los<br>
+      <span class="line2">Componentes</span><br>
+      del Arduino
+    </h1>
+    <p class="hero-sub">Un minicurso estructurado para aprender electrónica con Arduino desde los fundamentos hasta tu primer circuito funcional.</p>
+    <div class="hero-badges">
+      <span class="badge teal">⬡ Nivel Básico</span>
+      <span class="badge orange">⚡ 6 Módulos</span>
+      <span class="badge yellow">◎ Proyecto Final</span>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <div class="scroll-arrow"><div class="scroll-dot"></div></div>
+  </div>
+</section>
+
+<!-- ══════════ BODY: SIDEBAR + MAIN ══════════ -->
+<div class="page-body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-dot"></div>
+      ÍNDICE DE NAVEGACIÓN
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Fundamentos</div>
+      <a href="#intro" class="nav-link"><span class="nav-num">01</span> ¿Qué es Arduino?</a>
+      <a href="#hardware" class="nav-link"><span class="nav-num">02</span> La Placa Arduino</a>
+      <a href="#componentes" class="nav-link"><span class="nav-num">03</span> Componentes Básicos</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Electrónica</div>
+      <a href="#electricidad" class="nav-link"><span class="nav-num">04</span> Conceptos Eléctricos</a>
+      <a href="#protoboard" class="nav-link"><span class="nav-num">05</span> Uso del Protoboard</a>
+      <a href="#ide" class="nav-link"><span class="nav-num">06</span> IDE de Arduino</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Proyecto</div>
+      <a href="#proyecto" class="nav-link"><span class="nav-num">07</span> Proyecto Final: LED</a>
+      <a href="#codigo" class="nav-link"><span class="nav-num">08</span> Código del Proyecto</a>
+      <a href="#circuito" class="nav-link"><span class="nav-num">09</span> Diagrama del Circuito</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ── 01 ¿QUÉ ES ARDUINO? ── -->
+    <section class="section" id="intro">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <h2 class="section-title">¿Qué es <span>Arduino</span>?</h2>
+      </div>
+      <p>Arduino es una plataforma de <strong>hardware y software libre</strong> que permite crear proyectos de electrónica interactivos de forma sencilla. Fue diseñada en 2005 en el Instituto IVREA (Italia) con el objetivo de acercar la electrónica a personas sin experiencia técnica.</p>
+      <p>Su núcleo es un microcontrolador programable que puede leer entradas (sensores, botones, señales) y convertirlas en salidas (activar motores, encender LEDs, enviar datos). Todo esto se controla mediante un lenguaje de programación basado en C/C++.</p>
+
+      <div class="tip">
+        <strong>// CONCEPTO CLAVE</strong><br>
+        Arduino es como el cerebro de un proyecto electrónico: recibe información del mundo físico y decide qué hacer con ella.
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">🔓</div>
+          <div class="card-title">Open Source</div>
+          <div class="card-desc">Diseños, esquemas y código disponibles libremente para todos.</div>
+        </div>
+        <div class="card orange">
+          <div class="card-icon">💡</div>
+          <div class="card-title">Fácil de aprender</div>
+          <div class="card-desc">Comunidad enorme con tutoriales, librerías y ejemplos listos para usar.</div>
+        </div>
+        <div class="card yellow">
+          <div class="card-icon">🔧</div>
+          <div class="card-title">Versátil</div>
+          <div class="card-desc">Robótica, IoT, domótica, arte interactivo y mucho más.</div>
+        </div>
+        <div class="card blue">
+          <div class="card-icon">💰</div>
+          <div class="card-title">Económico</div>
+          <div class="card-desc">Una placa Arduino Uno cuesta menos de $10 USD en el mercado.</div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider"/>
+
+    <!-- ── 02 LA PLACA ARDUINO ── -->
+    <section class="section" id="hardware">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <h2 class="section-title">La Placa <span>Arduino Uno</span></h2>
+      </div>
+      <p>El modelo más popular y recomendado para aprender es el <strong>Arduino Uno R3</strong>. Conocer sus partes es el primer paso antes de conectar cualquier componente externo.</p>
+
+      <table class="pin-table">
+        <thead>
+          <tr>
+            <th>Componente</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pin-color" style="background:#50fa7b"></span>Microcontrolador ATmega328P</td>
+            <td>El "cerebro" de la placa. Procesa el programa.</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td><span class="pin-color" style="background:#ff79c6"></span>Pines Digitales (D0–D13)</td>
+            <td>Lectura/escritura de señales digitales (0V ó 5V).</td>
+            <td>14</td>
+          </tr>
+          <tr>
+            <td><span class="pin-color" style="background:#f1c40f"></span>Pines Analógicos (A0–A5)</td>
+            <td>Lectura de valores entre 0 y 1023 (0V a 5V).</td>
+            <td>6</td>
+          </tr>
+          <tr>
+            <td><span class="pin-color" style="background:#ff6b2b"></span>Pin 5V / 3.3V / GND</td>
+            <td>Alimentación para componentes externos.</td>
+            <td>Múltiple</td>
+          </tr>
+          <tr>
+            <td><span class="pin-color" style="background:#8be9fd"></span>Pin 13 con LED</td>
+            <td>LED integrado en la placa, útil para pruebas.</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td><span class="pin-color" style="background:#bd93f9"></span>Puerto USB tipo B</td>
+            <td>Programación y alimentación desde computadora.</td>
+            <td>1</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warning">
+        <strong>// IMPORTANTE</strong><br>
+        Los pines marcados con ~ (3, 5, 6, 9, 10, 11) son pines PWM: pueden simular señales analógicas mediante pulsos rápidos.
+      </div>
+    </section>
+
+    <hr class="divider"/>
+
+    <!-- ── 03 COMPONENTES BÁSICOS ── -->
+    <section class="section" id="componentes">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <h2 class="section-title">Componentes <span>Esenciales</span></h2>
+      </div>
+      <p>Antes de hacer cualquier proyecto necesitas reconocer los componentes electrónicos más comunes. Estos son los imprescindibles para comenzar:</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">💡</div>
+          <div class="card-title">LED</div>
+          <div class="card-desc">Diodo emisor de luz. Tiene polaridad (+/-). Opera a 2–3.5V. Siempre usarlo con resistencia.</div>
+        </div>
+        <div class="card orange">
+          <div class="card-icon">〰️</div>
+          <div class="card-title">Resistencia</div>
+          <div class="card-desc">Limita el flujo de corriente. El valor se lee con el código de colores. Unidad: Ohm (Ω).</div>
+        </div>
+        <div class="card yellow">
+          <div class="card-icon">🔘</div>
+          <div class="card-title">Pulsador (Button)</div>
+          <div class="card-desc">Interruptor momentáneo. Abre o cierra un circuito al presionarlo.</div>
+        </div>
+        <div class="card blue">
+          <div class="card-icon">🌡️</div>
+          <div class="card-title">Sensor LM35</div>
+          <div class="card-desc">Sensor de temperatura analógico. Salida lineal de 10mV por cada °C.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <div class="card-title">Potenciómetro</div>
+          <div class="card-desc">Resistencia variable ajustable manualmente. Útil para controlar voltaje.</div>
+        </div>
+        <div class="card orange">
+          <div class="card-icon">🔊</div>
+          <div class="card-title">Buzzer</div>
+          <div class="card-desc">Genera sonido mediante vibraciones piezoeléctricas. Activo o pasivo.</div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>// CONSEJO</strong><br>
+        Un kit Arduino básico incluye todos estos componentes por menos de $20 USD. Busca "Arduino Starter Kit" en tiendas locales o en línea.
+      </div>
+    </section>
+
+    <hr class="divider"/>
+
+    <!-- ── 04 CONCEPTOS ELÉCTRICOS ── -->
+    <section class="section" id="electricidad">
+      <div class="section-header">
+        <div class="section-num">04</div>
+        <h2 class="section-title">Conceptos <span>Eléctricos</span> Clave</h2>
+      </div>
+      <p>Para trabajar con Arduino sin quemar componentes, necesitas entender tres conceptos fundamentales de la electrónica: voltaje, corriente y resistencia.</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">Voltaje (V)</div>
+          <div class="card-desc">La "presión" que empuja la electricidad. Arduino trabaja a 5V. Símbolo: V. Medidor: Voltímetro.</div>
+        </div>
+        <div class="card orange">
+          <div class="card-icon">〜</div>
+          <div class="card-title">Corriente (I)</div>
+          <div class="card-desc">El flujo de electrones. Se mide en Amperios (A). Los pines Arduino dan máx. 40mA por pin.</div>
+        </div>
+        <div class="card yellow">
+          <div class="card-icon">Ω</div>
+          <div class="card-title">Resistencia (R)</div>
+          <div class="card-desc">Oposición al flujo de corriente. Se mide en Ohms (Ω). Protege componentes.</div>
+        </div>
+      </div>
+
+      <p>La relación entre estos tres se expresa en la <strong>Ley de Ohm</strong>: <code style="font-family:var(--mono);color:var(--teal);font-size:0.9rem;">V = I × R</code></p>
+
+      <div class="tip">
+        <strong>// CÁLCULO PRÁCTICO</strong><br>
+        Para conectar un LED (2V, 20mA) a 5V de Arduino:<br>
+        R = (5V – 2V) / 0.020A = 150Ω → usa una resistencia de 220Ω (valor estándar más cercano).
+      </div>
+    </section>
+
+    <hr class="divider"/>
+
+    <!-- ── 05 PROTOBOARD ── -->
+    <section class="section" id="protoboard">
+      <div class="section-header">
+        <div class="section-num">05</div>
+        <h2 class="section-title">El <span>Protoboard</span></h2>
+      </div>
+      <p>El protoboard (o breadboard) es una placa con orificios interconectados que permite armar circuitos <strong>sin soldar</strong>. Es la herramienta más usada para prototipos rápidos con Arduino.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <h4>Filas centrales (a–e y f–j)</h4>
+            <p>Los orificios de cada fila están conectados horizontalmente en grupos de 5. Inserta componentes aquí para conectarlos entre sí.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Carriles de alimentación (+ y −)</h4>
+            <p>Las columnas laterales marcadas con rojo (+) y negro (−) van conectadas a 5V y GND de Arduino respectivamente. Son el suministro de toda la placa.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Cables Dupont</h4>
+            <p>Son los cables con punta dorada para conectar el protoboard con Arduino. Vienen en versiones Macho–Macho, Macho–Hembra y Hembra–Hembra.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Regla de oro: no cruzar cables</h4>
+            <p>Mantén el cableado ordenado y corto para evitar errores de conexión y cortocircuitos accidentales.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider"/>
+
+    <!-- ── 06 IDE DE ARDUINO ── -->
+    <section class="section" id="ide">
+      <div class="section-header">
+        <div class="section-num">06</div>
+        <h2 class="section-title">El IDE de <span>Arduino</span></h2>
+      </div>
+      <p>El <strong>Arduino IDE</strong> (Integrated Development Environment) es el programa donde escribes y subes el código a tu placa. Es gratuito y compatible con Windows, Mac y Linux.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <h4>Instalar el IDE</h4>
+            <p>Descarga desde <code style="font-family:var(--mono);color:var(--teal)">arduino.cc/en/software</code>. Recomendado: Arduino IDE 2.x.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Seleccionar la placa</h4>
+            <p>En Herramientas → Placa → selecciona "Arduino Uno" o el modelo que tengas.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Seleccionar el puerto</h4>
+            <p>Herramientas → Puerto → elige el COM correspondiente (en Windows) o /dev/ttyUSB (en Linux/Mac).</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Estructura básica de un programa</h4>
+            <p>Todo sketch Arduino tiene dos funciones obligatorias: <code style="font-family:var(--mono);color:var(--teal)">setup()</code> que corre una vez al inicio y <code style="font-family:var(--mono);color:var(--teal)">loop()</code> que se repite continuamente.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label">Estructura mínima de un Sketch</div>
+        <pre><span class="cmt">// Variables globales (si las necesitas)</span>
+<span class="kw">int</span> ledPin = <span class="num">13</span>;
+
+<span class="cmt">// setup() se ejecuta UNA VEZ al encender</span>
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(ledPin, OUTPUT); <span class="cmt">// configurar pin como salida</span>
+}
+
+<span class="cmt">// loop() se repite INFINITAMENTE</span>
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="fn">digitalWrite</span>(ledPin, HIGH); <span class="cmt">// encender LED</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);               <span class="cmt">// esperar 1 segundo</span>
+  <span class="fn">digitalWrite</span>(ledPin, LOW);  <span class="cmt">// apagar LED</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);               <span class="cmt">// esperar 1 segundo</span>
+}</pre>
+      </div>
+    </section>
+
+    <hr class="divider"/>
+
+    <!-- ── 07 PROYECTO FINAL ── -->
+    <section class="section" id="proyecto">
+      <div class="section-header">
+        <div class="section-num">07</div>
+        <h2 class="section-title">Proyecto Final: <span>LED Parpadeante</span></h2>
+      </div>
+
+      <div class="project-box">
+        <h3>🎯 Objetivo del Minicurso</h3>
+        <p>Construir un circuito con un LED externo que parpadea de manera controlada usando Arduino Uno. Este proyecto integra todos los conceptos aprendidos: conocimiento de la placa, uso del protoboard, cálculo de resistencias y programación básica.</p>
+      </div>
+
+      <h3 style="font-family:var(--cond);color:var(--white);font-size:1.1rem;text-transform:uppercase;letter-spacing:0.05em;margin:1.5rem 0 1rem;">Materiales necesarios</h3>
+      <div class="material-list">
+        <div class="material-item"><span class="material-qty">× 1</span> Placa Arduino Uno + cable USB</div>
+        <div class="material-item"><span class="material-qty">× 1</span> Protoboard (breadboard)</div>
+        <div class="material-item"><span class="material-qty">× 1</span> LED de cualquier color (5mm)</div>
+        <div class="material-item"><span class="material-qty">× 1</span> Resistencia de 220Ω (rojo-rojo-marrón)</div>
+        <div class="material-item"><span class="material-qty">× 2</span> Cables Dupont Macho-Macho</div>
+        <div class="material-item"><span class="material-qty">× 1</span> Computadora con Arduino IDE instalado</div>
+      </div>
+    </section>
+
+    <hr class="divider"/>
+
+    <!-- ── 08 CÓDIGO ── -->
+    <section class="section" id="codigo">
+      <div class="section-header">
+        <div class="section-num">08</div>
+        <h2 class="section-title">Código del <span>Proyecto</span></h2>
+      </div>
+      <p>El código siguiente hace que el LED externo conectado al pin 9 parpadee con intervalos personalizables. Cópialo en el IDE, selecciona la placa y el puerto, y presiona el botón de subir (→).</p>
+
+      <div class="code-block">
+        <div class="code-label">LED_Parpadeante.ino</div>
+        <pre><span class="cmt">/*
+  PROYECTO: LED Parpadeante
+  Descripción: Enciende y apaga un LED externo
+               conectado al pin digital 9.
+  Autor: Guía Arduino desde Cero
+  Fecha: 2024
+*/</span>
+
+<span class="cmt">// ──── CONFIGURACIÓN ────</span>
+<span class="kw">const int</span> LED_PIN = <span class="num">9</span>;   <span class="cmt">// pin digital donde está el LED</span>
+<span class="kw">int</span> tiempoEncendido  = <span class="num">500</span>; <span class="cmt">// ms que el LED permanece encendido</span>
+<span class="kw">int</span> tiempoApagado   = <span class="num">500</span>; <span class="cmt">// ms que el LED permanece apagado</span>
+
+<span class="cmt">// ──── SETUP ────</span>
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(LED_PIN, OUTPUT); <span class="cmt">// configurar como salida</span>
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);        <span class="cmt">// iniciar comunicación serial</span>
+  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"LED Parpadeante iniciado"</span>);
+}
+
+<span class="cmt">// ──── LOOP ────</span>
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="fn">digitalWrite</span>(LED_PIN, HIGH);        <span class="cmt">// encender</span>
+  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"LED: ON"</span>);
+  <span class="fn">delay</span>(tiempoEncendido);
+
+  <span class="fn">digitalWrite</span>(LED_PIN, LOW);         <span class="cmt">// apagar</span>
+  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"LED: OFF"</span>);
+  <span class="fn">delay</span>(tiempoApagado);
+}</pre>
+      </div>
+
+      <div class="tip">
+        <strong>// EXPERIMENTA</strong><br>
+        Modifica los valores de <code style="font-family:var(--mono);color:var(--teal)">tiempoEncendido</code> y <code style="font-family:var(--mono);color:var(--teal)">tiempoApagado</code> para cambiar la velocidad del parpadeo. Prueba valores como 100, 250 o 2000 ms.
+      </div>
+    </section>
+
+    <hr class="divider"/>
+
+    <!-- ── 09 CIRCUITO ── -->
+    <section class="section" id="circuito">
+      <div class="section-header">
+        <div class="section-num">09</div>
+        <h2 class="section-title">Diagrama del <span>Circuito</span></h2>
+      </div>
+      <p>Conecta los componentes tal como se muestra en el diagrama. Recuerda que el LED tiene polaridad: la pata más larga (ánodo) va al lado positivo del circuito.</p>
+
+      <div class="circuit-diagram">
+        <div class="diagram-label">Diagrama esquemático · LED Parpadeante con Arduino Uno</div>
+        <!-- Schematic SVG -->
+        <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" width="100%">
+          <!-- Background -->
+          <rect width="700" height="340" fill="#070b10"/>
+
+          <!-- === ARDUINO BOARD === -->
+          <rect x="30" y="80" width="160" height="200" rx="6" fill="#0a1a0a" stroke="#00d4aa" stroke-width="1.5"/>
+          <rect x="35" y="85" width="150" height="190" rx="4" fill="#0f2010" stroke="#1e4a20" stroke-width="1"/>
+          <text x="110" y="130" text-anchor="middle" font-family="Share Tech Mono" font-size="9" fill="#00d4aa">ARDUINO</text>
+          <text x="110" y="143" text-anchor="middle" font-family="Share Tech Mono" font-size="9" fill="#00d4aa">UNO</text>
+          <!-- USB port -->
+          <rect x="45" y="88" width="30" height="16" rx="2" fill="#1a3a1a" stroke="#00d4aa" stroke-width="1"/>
+          <text x="60" y="99" text-anchor="middle" font-family="Share Tech Mono" font-size="7" fill="#00d4aa">USB</text>
+
+          <!-- Pin 9 -->
+          <rect x="185" y="158" width="18" height="10" rx="1" fill="#00d4aa" opacity="0.8"/>
+          <text x="165" y="166" font-family="Share Tech Mono" font-size="8" fill="#00d4aa">D9</text>
+
+          <!-- GND pin -->
+          <rect x="185" y="218" width="18" height="10" rx="1" fill="#ff6b2b" opacity="0.7"/>
+          <text x="158" y="226" font-family="Share Tech Mono" font-size="8" fill="#ff6b2b">GND</text>
+
+          <!-- === WIRE from pin 9 → resistor === -->
+          <line x1="203" y1="163" x2="340" y2="163" stroke="#00d4aa" stroke-width="2"/>
+
+          <!-- === RESISTOR === -->
+          <!-- Wire in -->
+          <line x1="340" y1="163" x2="360" y2="163" stroke="#00d4aa" stroke-width="2"/>
+          <!-- Resistor body -->
+          <rect x="360" y="154" width="60" height="18" rx="3" fill="#1a1000" stroke="#ffd166" stroke-width="1.5"/>
+          <!-- Color bands (220Ω: red-red-brown) -->
+          <rect x="374" y="154" width="5" height="18" rx="0" fill="#e74c3c" opacity="0.8"/>
+          <rect x="383" y="154" width="5" height="18" rx="0" fill="#e74c3c" opacity="0.8"/>
+          <rect x="392" y="154" width="5" height="18" rx="0" fill="#8b4513" opacity="0.8"/>
+          <!-- Resistor label -->
+          <text x="390" y="145" text-anchor="middle" font-family="Share Tech Mono" font-size="8" fill="#ffd166">220Ω</text>
+          <!-- Wire out -->
+          <line x1="420" y1="163" x2="450" y2="163" stroke="#00d4aa" stroke-width="2"/>
+
+          <!-- === LED === -->
+          <!-- Anode line -->
+          <line x1="450" y1="163" x2="470" y2="163" stroke="#00d4aa" stroke-width="2"/>
+          <!-- LED triangle -->
+          <polygon points="470,150 470,176 500,163" fill="rgba(255,100,100,0.3)" stroke="#ff4444" stroke-width="1.5"/>
+          <!-- LED cathode bar -->
+          <line x1="500" y1="150" x2="500" y2="176" stroke="#ff4444" stroke-width="2.5"/>
+          <!-- LED glow effect -->
+          <circle cx="485" cy="163" r="18" fill="rgba(255,80,80,0.06)" stroke="none"/>
+          <circle cx="485" cy="163" r="12" fill="rgba(255,80,80,0.04)" stroke="none"/>
+          <!-- LED label -->
+          <text x="483" y="200" text-anchor="middle" font-family="Share Tech Mono" font-size="8" fill="#ff6b6b">LED</text>
+          <!-- Light rays -->
+          <line x1="510" y1="145" x2="522" y2="135" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="2,2" opacity="0.6"/>
+          <line x1="515" y1="155" x2="530" y2="150" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="2,2" opacity="0.6"/>
+          <line x1="510" y1="165" x2="525" y2="168" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="2,2" opacity="0.6"/>
+
+          <!-- === WIRE from cathode → down → GND === -->
+          <line x1="500" y1="163" x2="550" y2="163" stroke="#ff6b2b" stroke-width="2"/>
+          <line x1="550" y1="163" x2="550" y2="240" stroke="#ff6b2b" stroke-width="2"/>
+          <line x1="550" y1="240" x2="203" y2="240" stroke="#ff6b2b" stroke-width="2"/>
+          <line x1="203" y1="240" x2="203" y2="223" stroke="#ff6b2b" stroke-width="2"/>
+
+          <!-- === PROTOBOARD === -->
+          <rect x="300" y="100" width="300" height="200" rx="4" fill="#0f0f08" stroke="#2a2a18" stroke-width="1.5"/>
+          <text x="450" y="118" text-anchor="middle" font-family="Share Tech Mono" font-size="8" fill="#5a7a5a">PROTOBOARD</text>
+          <!-- Holes representation -->
+          <g opacity="0.4">
+            <circle cx="330" cy="135" r="2" fill="#5a7a5a"/>
+            <circle cx="350" cy="135" r="2" fill="#5a7a5a"/>
+            <circle cx="370" cy="135" r="2" fill="#5a7a5a"/>
+            <circle cx="330" cy="150" r="2" fill="#5a7a5a"/>
+            <circle cx="350" cy="150" r="2" fill="#5a7a5a"/>
+            <circle cx="370" cy="150" r="2" fill="#5a7a5a"/>
+            <circle cx="420" cy="135" r="2" fill="#5a7a5a"/>
+            <circle cx="440" cy="135" r="2" fill="#5a7a5a"/>
+            <circle cx="460" cy="135" r="2" fill="#5a7a5a"/>
+            <circle cx="510" cy="135" r="2" fill="#5a7a5a"/>
+            <circle cx="530" cy="135" r="2" fill="#5a7a5a"/>
+            <circle cx="560" cy="135" r="2" fill="#5a7a5a"/>
+          </g>
+
+          <!-- Labels / annotations -->
+          <text x="240" y="155" font-family="Share Tech Mono" font-size="7.5" fill="#00d4aa" opacity="0.7">+5V → pin 9</text>
+          <text x="240" y="250" font-family="Share Tech Mono" font-size="7.5" fill="#ff6b2b" opacity="0.7">GND</text>
+
+          <!-- Polarity labels on LED -->
+          <text x="452" y="176" font-family="Share Tech Mono" font-size="7" fill="#888">+</text>
+          <text x="503" y="176" font-family="Share Tech Mono" font-size="7" fill="#888">−</text>
+
+          <!-- Legend -->
+          <line x1="30" y1="295" x2="55" y2="295" stroke="#00d4aa" stroke-width="2"/>
+          <text x="60" y="299" font-family="Share Tech Mono" font-size="8" fill="#00d4aa">Cable señal (D9)</text>
+          <line x1="180" y1="295" x2="205" y2="295" stroke="#ff6b2b" stroke-width="2"/>
+          <text x="210" y="299" font-family="Share Tech Mono" font-size="8" fill="#ff6b2b">Cable GND</text>
+          <rect x="370" y="289" width="28" height="12" rx="2" fill="none" stroke="#ffd166" stroke-width="1.5"/>
+          <text x="402" y="299" font-family="Share Tech Mono" font-size="8" fill="#ffd166">Resistencia 220Ω</text>
+          <polygon points="530,289 530,301 548,295" fill="rgba(255,80,80,0.4)" stroke="#ff4444" stroke-width="1"/>
+          <text x="555" y="299" font-family="Share Tech Mono" font-size="8" fill="#ff6b6b">LED</text>
+        </svg>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <h4>Conexión paso a paso</h4>
+            <p>Cable desde pin D9 de Arduino → fila del protoboard (ej. fila 10, columna a).</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Insertar la resistencia</h4>
+            <p>Resistencia de 220Ω en la misma fila que el cable del pin 9. El otro extremo en otra fila vacía.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Insertar el LED</h4>
+            <p>Pata larga (ánodo +) en la fila donde termina la resistencia. Pata corta (cátodo −) en otra fila.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <h4>Cable a GND</h4>
+            <p>Cable desde la fila del cátodo (−) del LED hasta el pin GND de Arduino. ¡El circuito está completo!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="warning">
+        <strong>// VERIFICA ANTES DE ENCENDER</strong><br>
+        Revisa dos veces que el LED esté orientado correctamente (pata larga al +) y que la resistencia esté siempre presente. Un LED sin resistencia se quema en segundos.
+      </div>
+
+      <div class="project-box" style="margin-top:2rem;border-color:rgba(0,212,170,0.4);">
+        <h3>✅ ¡Felicidades! Completaste el Minicurso</h3>
+        <p>Has aprendido qué es Arduino, identificado sus partes, conocido los componentes esenciales, entendido los conceptos eléctricos básicos, aprendido a usar el protoboard, instalado el IDE y construido tu primer circuito funcional. Desde aquí puedes avanzar a proyectos más complejos: múltiples LEDs, sensores, motores y comunicación inalámbrica.</p>
+
+        <div style="margin-top:1.2rem;display:flex;gap:10px;flex-wrap:wrap;">
+          <span class="badge teal">✔ Hardware identificado</span>
+          <span class="badge orange">✔ Ley de Ohm aplicada</span>
+          <span class="badge yellow">✔ Primer código escrito</span>
+          <span class="badge" style="border-color:#bd93f9;color:#bd93f9">✔ Circuito construido</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer" style="display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:var(--bg2);border-top:1px solid var(--border);font-family:var(--mono);font-size:0.65rem;color:var(--muted);">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="footer-dot"></div>
+    GUÍA DE COMPONENTES ARDUINO — MINICURSO BÁSICO
+  </div>
+  <div>// OPEN SOURCE HARDWARE</div>
+  <div>NIVEL: PRINCIPIANTE · 6 MÓDULOS</div>
+</footer>
+
+</body>
+</html>
